@@ -1,0 +1,118 @@
+: ${TURTLEBOT_STAGE_MAP_FILE:=`rospack find turtlebot_stage`/maps/maze.yaml}
+: ${TURTLEBOT_STAGE_WORLD_FILE:=`rospack find turtlebot_stage`/maps/stage/maze.world}
+# Exports
+export TURTLEBOT_STAGE_MAP_FILE
+export TURTLEBOT_STAGE_WORLD_FILE
+
+
+
+
+
+
+sudo apt-get update
+sudo apt-get install ros-indigo-turtlebot-rviz-launchers
+sudo apt-get install ros-indigo-turtlebot-stage
+
+
+cd ~/Projects/IE_482-582
+mkdir chapter9
+
+
+Scan a room
+	TERMINAL 1 -- Stage Robot Simulator (alternative to Gazebo) and rviz
+	cd ~/Projects/IE_482-582/chapter9
+	roslaunch turtlebot_stage turtlebot_in_stage.launch 
+
+	TERMINAL 2 -- Teleop
+	cd ~/Projects/IE_482-582/chapter9
+	roslaunch turtlebot_teleop keyboard_teleop.launch 
+
+	TERMINAL 3 -- Record  
+	cd ~/Projects/IE_482-582/chapter9
+	rosbag record -O data.bag /scan /tf			(capital oh)
+
+
+	Kill Terminal 3
+	Kill Terminal 1
+	Kill Terminal 2
+
+
+
+
+Build a map
+	TERMINAL 1
+	roscore
+
+	TERMINAL 2 -- slam_gmapping
+	cd ~/Projects/IE_482-582/chapter9
+	rosparam set use_sim_time true
+	rosrun gmapping slam_gmapping
+
+	TERMINAL 3 -- replay rosbag data
+	cd ~/Projects/IE_482-582/chapter9
+	rosbag play --clock data.bag
+	rosrun map_server map_saver
+
+	Kill Terminal 3
+	Kill Terminal 2
+
+	TERMINAL 2 -- Look at the map image
+	eog map.pgm
+
+
+Improve map
+	TERMINAL 1
+	roscore
+
+	TERMINAL 2
+	cd ~/Projects/IE_482-582/chapter9
+
+	rosparam set /slam_gmapping/angularUpdate 0.1
+	rosparam set /slam_gmapping/linearUpdate 0.1
+	rosparam set /slam_gmapping/lskip 10
+	rosparam set /slam_gmapping/xmax 10
+	rosparam set /slam_gmapping/xmin -10
+	rosparam set /slam_gmapping/ymax 10
+	rosparam set /slam_gmapping/ymin -10
+
+	rosparam set use_sim_time true
+	rosrun gmapping slam_gmapping
+
+	TERMINAL 3 -- replay rosbag data
+	cd ~/Projects/IE_482-582/chapter9
+	rosbag play --clock data.bag
+	rosrun map_server map_saver
+
+	Kill Terminal 3
+	Kill Terminal 2
+	Kill Terminal 1
+
+
+
+
+Start the map server and view 	
+	TERMINAL 1
+	roscore
+
+	TERMINAL 2
+	cd ~/Projects/IE_482-582/chapter9
+	rosrun map_server map_server map.yaml
+
+	TERMINAL 3 
+	(optional) rostopic list
+	(optional) rostopic echo map_metadata
+	rosrun rviz rviz
+
+	# Within RViz:
+		* Add --> By topic --> /map
+
+
+	
+	
+
+
+
+
+
+
+
